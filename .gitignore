@@ -3,3 +3,5 @@ config.yaml
 
 #Ignore all pyc files
 *.pyc
+
+config.yaml
