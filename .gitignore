@@ -1,2 +1,5 @@
 # Ignore personal config file
 config.yaml
+
+#Ignore all pyc files
+*.pyc
