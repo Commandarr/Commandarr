@@ -1,6 +1,7 @@
 import json
 import requests
 import os
+import yaml
 
 from flask import Flask
 from flask import request
@@ -8,7 +9,9 @@ from flask import make_response
 
 import sonarr
 import radarr
+import lidarr
 
+CONFIG = yaml.safe_load(open('config.yaml'))
 app = Flask(__name__)
 
 # VERSION: '0.1.0'
@@ -19,6 +22,7 @@ def webhook():
 
     # print('Request: ')
     # print(json.dumps(req, indent=4))
+    sendAnalyticsReport(req)
 
     res = processRequest(req)
 
@@ -53,6 +57,17 @@ def processRequest(request):
     print data
     return res
 
+
+def sendAnalyticsReport(sent_data):
+    if CONFIG['comandarr']['analytics']['enable']:
+        # if CONFIG['comandarr']['analytics']['keys']
+        processed_data = {
+            'message': json.dumps(sent_data)
+        }
+        headers = {'Authorization': 'Token ' + CONFIG['comandarr']['analytics']['keys']['google']}
+        req = requests.post('https://botanalytics.co/api/v1/messages/user/google-assistant/', data=processed_data, headers=headers)
+        print 'Sent Analytics'
+        print req.text
 
 
 def makeWebhookResult(result):
