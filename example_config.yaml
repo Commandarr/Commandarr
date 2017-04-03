@@ -1,0 +1,53 @@
+# Sonarr Configuration
+sonarr:
+  server:
+    addr: myserver.ddns.net # Public IP Address or Dynamic DNS
+    port: 8989 # Default: 8989
+    ssl: False
+  auth:
+    apikey: apikey
+  resources:
+    app_logo: 'https://avatars1.githubusercontent.com/u/1082903?v=3&s=200'
+    website: 'http://www.sonarr.tv'
+    github: 'https://www.github.com/sonarr/sonarr'
+
+
+# Sonarr Configuration
+radarr:
+  server:
+    addr: myserver.ddns.net # Public IP Address or Dynamic DNS
+    port: 7878 # Default: 7878
+    ssl: False
+  authentication:
+    apikey: apikey
+  resources:
+    app_logo: 'https://avatars3.githubusercontent.com/u/25025331?v=3&s=200'
+    website: 'http://www.radarr.video'
+    github: 'https://www.github.com/radarr/radarr'
+
+# Lidarr Configuration
+lidarr:
+  server:
+    addr: myserver.ddns.net # Public IP Address or Dynamic DNS
+    port: 0000 # Default: 0000
+    ssl: False
+  auth:
+    apikey: apikey
+  resources:
+    app_logo: ''
+    website: ''
+    github: 'https://github.com/mattman86/Lidarr'
+
+# Comandarr Configuration
+comandarr:
+  settings:
+    slang: au # AU (Australian) or US (American)
+    explicit: False # slang must be AU
+  resources:
+    app_logo: 'https://avatars1.githubusercontent.com/u/1082903?v=3&s=200'
+    website: ''
+    github: 'https://www.github.com/TJohnson93/comandarr'
+  analytics:
+    enable: False # True/False
+    keys:
+      google: apikey
