@@ -48,6 +48,6 @@ comandarr:
     website: ''
     github: 'https://www.github.com/TJohnson93/comandarr'
   analytics:
-    enable: False # True/False
+    enable: True # True/False
     keys:
       google: apikey
