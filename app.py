@@ -7,11 +7,13 @@ from flask import Flask
 from flask import request
 from flask import make_response
 
-import sonarr
-import radarr
-import lidarr
+from comandarr import sonarr
+from comandarr import radarr
+from comandarr import lidarr
 
-CONFIG = yaml.safe_load(open('config.yaml'))
+from definitions import CONFIG_PATH
+
+config = yaml.safe_load(open(CONFIG_PATH))
 app = Flask(__name__)
 
 # VERSION: '0.1.0'
@@ -20,8 +22,8 @@ app = Flask(__name__)
 def webhook():
     req = request.get_json(silent=True, force=True)
 
-    # print('Request: ')
-    # print(json.dumps(req, indent=4))
+    print('Request: ')
+    print(json.dumps(req, indent=4))
     sendAnalyticsReport(req)
 
     res = processRequest(req)
@@ -35,22 +37,22 @@ def webhook():
 
 
 def processRequest(request):
+    media_title = request['result']['parameters']['media-title']
     media_type = request['result']['parameters']['media-type']
     action = request['result']['action']
 
     data = []
 
-    # Sonarr Requests (TV Series)
+    # Based on Action. call the appropriate function.
     if action == 'download_media':
         if media_type == 'Series':
-            data = sonarr.confirmSeries(request['result']['parameters']['media-title'])
-            # data = sonarr.addSeriesToWatchList(request['result']['parameters']['media-title'])
+            data = sonarr.confirmSeries(media_title, media_type)
         elif media_type == 'Movie':
-            data = radarr.addSeriesToWatchList(request['result']['parameters']['media-title'])
+            data = radarr.addSeriesToWatchList(media_title, media_type)
+    elif action == 'download_media_confirm':
+        if media_type == 'Series':
+            data = sonarr.confirmSeries(media_title, media_type, request['result']['parameters']['tvdbId'])
 
-    # Radarr Request (Movies)
-    if action == 'add_movie':
-        data = []
 
     res = makeWebhookResult(data)
 
@@ -59,12 +61,12 @@ def processRequest(request):
 
 
 def sendAnalyticsReport(sent_data):
-    if CONFIG['comandarr']['analytics']['enable']:
-        # if CONFIG['comandarr']['analytics']['keys']
+    if config['comandarr']['analytics']['enable']:
+        # if config['comandarr']['analytics']['keys']
         processed_data = {
             'message': json.dumps(sent_data)
         }
-        headers = {'Authorization': 'Token ' + CONFIG['comandarr']['analytics']['keys']['google']}
+        headers = {'Authorization': 'Token ' + config['comandarr']['analytics']['keys']['google']}
         req = requests.post('https://botanalytics.co/api/v1/messages/user/google-assistant/', data=processed_data, headers=headers)
         print 'Sent Analytics'
         print req.text

@@ -12,8 +12,8 @@
 #              through API.ai (Machine Learning(ML) and Natural Language
 #              Processing(NLP)) via webhook.
 #
-# Github Source: https://www.github.com/TJohnson93/comandarr/
-# Readme Source: https://www.github.com/TJohnson93/comandarr/README.md
+# Github Source: https://www.github.com/comandarr/comandarr/
+# Readme Source: https://www.github.com/comandarr/comandarr/README.md
 #
 # #############################################################################
 
@@ -22,22 +22,23 @@ import urllib2
 import requests
 import yaml
 import datetime
-import csv
 
-# Collect user configuration settings
-CONFIG = yaml.safe_load(open('config.yaml'))
+# Set User Configurations
+from definitions import CONFIG_PATH
+config = yaml.safe_load(open(CONFIG_PATH))
+
 
 # -------------------------------------------------------------
 # -------------------------- GENERIC --------------------------
 
-# Generate the server URL (e.g. https://ipaddress:port)
+# Generate the server URL
 def generateServerAddress():
-    if CONFIG['sonarr']['server']['ssl']:
+    if config['sonarr']['server']['ssl']:
         http = 'https://'
     else:
         http = 'http://'
 
-    return http + CONFIG['sonarr']['server']['addr'] + ':' + str(CONFIG['sonarr']['server']['port'])
+    return http + config['sonarr']['server']['addr'] + ':' + str(config['sonarr']['server']['port'])
 
 # Performs a clean up of a URL to ensure it is valid.
 def cleanUrl(text):
@@ -46,7 +47,7 @@ def cleanUrl(text):
 
 # Generate the query for the Sonarr API
 def generateApiQuery(endpoint, parameters={}):
-    url = generateServerAddress() + '/api/' + endpoint + '?apikey=' + CONFIG['sonarr']['auth']['apikey']
+    url = generateServerAddress() + '/api/' + endpoint + '?apikey=' + config['sonarr']['auth']['apikey']
 
     # If parameters exist iterate through dict and add parameters to URL.
     if parameters:
@@ -66,7 +67,7 @@ def generateWebhookResponse(response, context={}, slack_msg={}, fb_msg={}, tele_
             'telegram': tele_msg,
             'kik': kik_msg
         },
-        'contextOut': [context],
+        'contextOut': context,
         'source': 'Sonarr'
     }
 
@@ -116,6 +117,15 @@ def lookupSeriesByName(series_name):
     return json.load(urllib2.urlopen(generateApiQuery('series/lookup', params)))
 
 
+# Lookup Series information by the series name
+def lookupSeriesByTvdbId(tvdb_id):
+    params = {
+        'term': 'tvdb:' + tvdb_id
+    }
+    # return requests.get(generateApiQuery('series/lookup', params))
+    return json.load(urllib2.urlopen(generateApiQuery('series/lookup', params)))
+
+
 # ----------------------------------------------------------------
 # -------------------------- API/SERIES --------------------------
 
@@ -140,43 +150,88 @@ def getSeriesIdByName(series_name):
     return int(series_id)
 
 # Confirm the Series with the user
-def confirmSeries(series_name):
+def confirmSeries(series_name, media_type, tvdbId=0):
+    context_list = []
     result = {}
 
-    # Retrieve any shows that match the user's request
-    possible_matches = lookupSeriesByName(series_name)
+    # If only series_name parsed from request check for possible matches.
+    if tvdbId == 0:
+        # Query Sonarr for possible matches
+        possible_matches = lookupSeriesByName(series_name)
 
-    if len(possible_matches) > 1:
-        context_params = {}
-        response = 'There are ' + str(len(possible_matches)) + ' possible matches. Which one is correct?'
+        # Set response text
+        response = 'There are ' + str(len(possible_matches)) + ' possible matches. Which one is correct? \n'
 
+        # Add each possible match to response text and create a context with title
+        # and the tvdbId (to avoid searching again)
         for index, match in enumerate(possible_matches, start=1):
-            response += ' Option ' + str(index) + ' is ' + match['title'] + '.'
+            response += match['title'] + '. \n'
+            context_list.append({
+                    "name":"possible_match_0" + str(index),
+                    "lifespan":1,
+                    "parameters":{
+                        'media-title': match['title'],
+                        'tvdbId': match['tvdbId'],
+                        'media-type': media_type
+                        }
+                })
 
+        # Create custom app message formats
         slack_message = {
             'attachments': [{
                 'fallback': response,
                 'text': response,
                 'color': 'warning',
-                "thumb_url": CONFIG['sonarr']['resources']['app_logo'],
+                "thumb_url": config['sonarr']['resources']['app_logo'],
             }]
         }
-        context = {
-                "name":"media",
-                "lifespan":1,
-                "parameters":{}
-            }
 
-        result = generateWebhookResponse(response, context, slack_message)
+        # Generate the webhook response w/ custom messages and contexts
+        result = generateWebhookResponse(response, context_list, slack_message)
 
-    elif len(possible_matches) == 1:
-        for match in possible_matches:
-            result = addSeriesToWatchList(match)
+    else:
+        exact_match = lookupSeriesByName(tvdbId)
+        result = addSeriesToWatchList(match)
 
     return result
 
+    # Retrieve any shows that match the user's request
+    # possible_matches = lookupSeriesByName(series_name)
+    #
+    # if len(possible_matches) > 1:
+    #     context_list = []
+    #     response = 'There are ' + str(len(possible_matches)) + ' possible matches. Which one is correct? \n'
+    #
+    #     for index, match in enumerate(possible_matches, start=1):
+    #         response += match['title'] + '. \n'
+    #         context_list.append({
+    #                 "name":"possible_match_0" + str(index),
+    #                 "lifespan":1,
+    #                 "parameters":{'media-title': match['title'], 'tvdbId': match['tvdbId']}
+    #             })
+    #         print 'context_list ' + str(index)
+    #         print context_list
+    #
+    #
+    #     slack_message = {
+    #         'attachments': [{
+    #             'fallback': response,
+    #             'text': response,
+    #             'color': 'warning',
+    #             "thumb_url": config['sonarr']['resources']['app_logo'],
+    #         }]
+    #     }
+    #
+    #     result = generateWebhookResponse(response, context_list, slack_message)
+    #
+    # elif len(possible_matches) == 1:
+    #     for match in possible_matches:
+    #         result = addSeriesToWatchList(match)
+    #
+    # return result
+
 # Add a TV Series to Sonarr
-def addSeriesToWatchList(series, monitored='false'):
+def addSeriesToWatchList(series, tvdbId=0, monitored='false'):
     response = ''
 
 
@@ -185,7 +240,7 @@ def addSeriesToWatchList(series, monitored='false'):
     for show in my_shows:
 
         if series['tvdbId'] == show['tvdbId']:
-            if CONFIG['comandarr']['settings']['slang'].lower() == 'au':
+            if config['comandarr']['settings']['slang'].lower() == 'au':
                 print 'test1'
                 response = 'You Dill! ' + series['title'] + ' is already in Sonarr'
             else:
@@ -214,7 +269,7 @@ def addSeriesToWatchList(series, monitored='false'):
             # performCmdRescanSeries()
 
             #  Set user Response
-            if CONFIG['comandarr']['settings']['slang'].lower() == 'au':
+            if config['comandarr']['settings']['slang'].lower() == 'au':
                 response = 'No Worries! ' + series['title'] + ' has been added to Sonarr.'
             else:
                 response = 'Success! ' + series['title'] + ' has been added to Sonarr.'
@@ -226,7 +281,7 @@ def addSeriesToWatchList(series, monitored='false'):
             "pretext": "Message from Comandarr: " + response,
             'author_name': 'Sonarr',
             "author_link": generateServerAddress() + '/series/' + series['titleSlug'],
-            "author_icon": CONFIG['sonarr']['resources']['app_logo'],
+            "author_icon": config['sonarr']['resources']['app_logo'],
             'title': 'Imported: ' + series['title'],
             # 'text': series['overview'],
             'color': 'good',
@@ -242,7 +297,7 @@ def addSeriesToWatchList(series, monitored='false'):
                     "short": 'true'
                 }
             ],
-            "thumb_url": CONFIG['sonarr']['resources']['app_logo'],
+            "thumb_url": config['sonarr']['resources']['app_logo'],
         }]
     }
     context = {}
