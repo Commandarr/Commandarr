@@ -11,5 +11,6 @@ setup(
 # To create a Python package that can be installed via pip run the following
 # commands in the terminal.
 # python setup.py resiter
+# python setup.py sdist upload
 
 # REFERENCE: https://marthall.github.io/blog/how-to-package-a-python-app/
