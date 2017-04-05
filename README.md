@@ -2,7 +2,7 @@
 
 Comandarr is a bot that will interact with [Sonarr](https://github.com/Sonarr/Sonarr), [Radarr](https://github.com/Radarr/Radarr) and [Lidarr](https://github.com/mattman86/Lidarr) (currently in development) via a number of integrations (see below).
 
-**NOTE:** *Comandarr is currently in development! If you'd like to join the public beta test group please [sign up here](https://docs.google.com/forms/d/e/1FAIpQLSef0g1l4vUb8GNxIn4r6YgcIJWVQEGYaQQA45Tu43VbZKCyLA/viewform?c=0&w=1).*
+**NOTE:** *Comandarr is currently in development! If you'd like to join the public beta test group please [sign up here](https://docs.google.com/forms/d/e/1FAIpQLSef0g1l4vUb8GNxIn4r6YgcIJWVQEGYaQQA45Tu43VbZKCyLA/viewform?c=0&w=1).* 
 
 ## Integrations
 
