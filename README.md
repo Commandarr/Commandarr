@@ -34,7 +34,7 @@ Comandarr is a bot that will interact with [Sonarr](https://github.com/Sonarr/So
 
 * The project will be open sourced and can be found on [Github](https://github.com/Comandarr/Comandarr). 
 * If you'd like to submit feature requests for Comandarr please submit them through [FeatHub](http://feathub.com/Comandarr/Comandarr).
-* If you'd like to keep up with what's happening I have set up a Discord Server for discussions and development updates - [https://discord.gg/rwkfzQB](https://discord.gg/rwkfzQB) 
+* Join the [Comandarr Slack Community](https://slack-invite-comandarr.herokuapp.com/) to have discussions and keep up with development updates.
 
 ## Submit and Vote on Future Features
 
