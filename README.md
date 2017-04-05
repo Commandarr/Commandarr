@@ -11,12 +11,12 @@ Comandarr is a bot that will interact with [Sonarr](https://github.com/Sonarr/So
 
 **Future Integrations**
 
-* Amazon Alexa *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr))*
-* Microsoft Cortana *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr))*
-* Mycroft *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr))*
-* Facebook Messenger *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr))*
-* Telegram *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr))*
-* Kik *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr))*
+* Amazon Alexa *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr/+3))*
+* Microsoft Cortana *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr/+4))*
+* Mycroft *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr/+5))*
+* Facebook Messenger *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr/+6))*
+* Telegram *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr/+1))*
+* Kik *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr/+7))*
 * Twilio *(vote on [FeatHub](http://feathub.com/Comandarr/Comandarr))*
 
 ## Example of Bot Actions
