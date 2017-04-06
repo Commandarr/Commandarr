@@ -110,20 +110,31 @@ def performCmdRescanSeries():
 
 # Lookup Series information by the series name
 def lookupSeriesByName(series_name):
+    # Set query parameters
     params = {
         'term': cleanUrl(series_name)
     }
-    # return requests.get(generateApiQuery('series/lookup', params))
-    return json.load(urllib2.urlopen(generateApiQuery('series/lookup', params)))
+
+    # Perform Get request from Sonarr API
+    req = requests.get(generateApiQuery('series/lookup', params))
+    parsed_json = json.loads(req.text)
+    return parsed_json
 
 
 # Lookup Series information by the series name
 def lookupSeriesByTvdbId(tvdb_id):
+    # Convert from Float to Integer to String
+    tvdb_id_str = str(int(tvdb_id))
+
+    # Set query parameters
     params = {
-        'term': 'tvdb:' + tvdb_id
+        'term': 'tvdb:' + tvdb_id_str
     }
-    # return requests.get(generateApiQuery('series/lookup', params))
-    return json.load(urllib2.urlopen(generateApiQuery('series/lookup', params)))
+
+    # Perform Get request from Sonarr API
+    req = requests.get(generateApiQuery('series/lookup', params))
+    parsed_json = json.loads(req.text)
+    return parsed_json
 
 
 # ----------------------------------------------------------------
@@ -168,11 +179,10 @@ def confirmSeries(series_name, media_type, tvdbId=0):
             response += match['title'] + '. \n'
             context_list.append({
                     "name":"possible_match_0" + str(index),
-                    "lifespan":1,
+                    "lifespan":2,
                     "parameters":{
-                        'media-title': match['title'],
-                        'tvdbId': match['tvdbId'],
-                        'media-type': media_type
+                        'title': match['title'],
+                        'tvdbId': match['tvdbId']
                         }
                 })
 
@@ -190,89 +200,58 @@ def confirmSeries(series_name, media_type, tvdbId=0):
         result = generateWebhookResponse(response, context_list, slack_message)
 
     else:
-        exact_match = lookupSeriesByName(tvdbId)
-        result = addSeriesToWatchList(match)
+        exact_match = lookupSeriesByTvdbId(tvdbId)
+        print 'match: '
+        print exact_match
+        result = addSeriesToWatchList(exact_match)
 
     return result
 
-    # Retrieve any shows that match the user's request
-    # possible_matches = lookupSeriesByName(series_name)
-    #
-    # if len(possible_matches) > 1:
-    #     context_list = []
-    #     response = 'There are ' + str(len(possible_matches)) + ' possible matches. Which one is correct? \n'
-    #
-    #     for index, match in enumerate(possible_matches, start=1):
-    #         response += match['title'] + '. \n'
-    #         context_list.append({
-    #                 "name":"possible_match_0" + str(index),
-    #                 "lifespan":1,
-    #                 "parameters":{'media-title': match['title'], 'tvdbId': match['tvdbId']}
-    #             })
-    #         print 'context_list ' + str(index)
-    #         print context_list
-    #
-    #
-    #     slack_message = {
-    #         'attachments': [{
-    #             'fallback': response,
-    #             'text': response,
-    #             'color': 'warning',
-    #             "thumb_url": config['sonarr']['resources']['app_logo'],
-    #         }]
-    #     }
-    #
-    #     result = generateWebhookResponse(response, context_list, slack_message)
-    #
-    # elif len(possible_matches) == 1:
-    #     for match in possible_matches:
-    #         result = addSeriesToWatchList(match)
-    #
-    # return result
 
 # Add a TV Series to Sonarr
-def addSeriesToWatchList(series, tvdbId=0, monitored='false'):
+def addSeriesToWatchList(requested_series, requested_tvdbId=0, monitored='false'):
     response = ''
 
 
     # Check to see if match is already in Sonarr
     my_shows = getSeries()
-    for show in my_shows:
 
-        if series['tvdbId'] == show['tvdbId']:
-            if config['comandarr']['settings']['slang'].lower() == 'au':
-                print 'test1'
-                response = 'You Dill! ' + series['title'] + ' is already in Sonarr'
+    for series in requested_series:
+        for show in my_shows:
+            if int(series['tvdbId']) == int(show['tvdbId']):
+                if config['comandarr']['settings']['slang'].lower() == 'au':
+                    print 'test1'
+                    response = 'You Dill! ' + series['title'] + ' is already in Sonarr'
+                else:
+                    print 'test2'
+                    response = 'Looks like Sonarr is already watching for ' + series['title']
             else:
-                print 'test2'
-                response = 'Looks like Sonarr is already watching for ' + series['title']
-        else:
-            data = { # Generate data query
-                'tvdbId': int(series['tvdbId']),
-                'title': series['title'],
-                'qualityProfileId': 3,
-                'titleSlug': series['titleSlug'],
-                'images': series['images'],
-                'seasons': series['seasons'],
-                'monitored': True,
-                'seasonFolder': True,
-                'path': '/Volumes/Plex Media 1/Plex/TV Shows/' + series['title']
-            }
+                data = { # Generate data query
+                    'tvdbId': int(series['tvdbId']),
+                    'title': series['title'],
+                    'qualityProfileId': 3,
+                    'titleSlug': series['titleSlug'],
+                    'images': series['images'],
+                    'seasons': series['seasons'],
+                    'monitored': True,
+                    'seasonFolder': True,
+                    'path': '/Volumes/Plex Media 1/Plex/TV Shows/' + series['title']
+                }
 
-            # Convert to JSON
-            data_json = json.dumps(data)
+                # Convert to JSON
+                data_json = json.dumps(data)
 
-            # Submit request to API
-            r = requests.post(generateApiQuery('series'), data=data_json)
-            parsed_json = json.loads(r.text)
+                # Submit request to API
+                r = requests.post(generateApiQuery('series'), data=data_json)
+                parsed_json = json.loads(r.text)
 
-            # performCmdRescanSeries()
+                # performCmdRescanSeries()
 
-            #  Set user Response
-            if config['comandarr']['settings']['slang'].lower() == 'au':
-                response = 'No Worries! ' + series['title'] + ' has been added to Sonarr.'
-            else:
-                response = 'Success! ' + series['title'] + ' has been added to Sonarr.'
+                #  Set user Response
+                if config['comandarr']['settings']['slang'].lower() == 'au':
+                    response = 'No Worries! ' + series['title'] + ' has been added to Sonarr.'
+                else:
+                    response = 'Success! ' + series['title'] + ' has been added to Sonarr.'
 
     # Create Rich Notifications
     slack_message = {
