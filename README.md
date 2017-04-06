@@ -46,3 +46,4 @@ A shout out to the [Sonarr](https://github.com/Sonarr/Sonarr), [Radarr](https://
 
 A special shout out to my wife and family for always encouraging me to do the things I love.
 
+[![Build Status](https://travis-ci.org/Comandarr/Comandarr.svg?branch=master)](https://travis-ci.org/Comandarr/Comandarr)
