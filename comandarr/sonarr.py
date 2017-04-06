@@ -46,8 +46,7 @@ def generateServerAddress():
     else:
         http = 'http://'
 
-    addr = http + config['sonarr']['server']['addr'] + ':' + str(config['sonarr']['server']['port'])
-    return addr
+    return http + config['sonarr']['server']['addr'] + ':' + str(config['sonarr']['server']['port'])
 
 
 # Function: cleanUrl
@@ -99,7 +98,7 @@ def generateApiQuery(endpoint, parameters={}):
 # @param fb_msg | DICT | Specific Facebook Messenger formatting
 # @return result | DICT | The Response to user with different integration formatting.
 def generateWebhookResponse(response, context={}, slack_msg={}, fb_msg={}, tele_msg={}, kik_msg={}):
-    result = {
+    return {
         'speech': response,
         'displayText': response,
         'data': {
@@ -111,8 +110,6 @@ def generateWebhookResponse(response, context={}, slack_msg={}, fb_msg={}, tele_
         'contextOut': context,
         'source': 'Sonarr'
     }
-
-    return result
 
 
 # ------------------------------------------------------------------
@@ -225,7 +222,9 @@ def getSeries():
 # @param series_id | INT | Sonarr's Series ID
 # @return parsed_json | DICT | information about single TV Series in Sonarr
 def getSeriesById(series_id):
-    return json.load(urllib2.urlopen(generateApiQuery('series/' + str(series_id))))
+    req = requests.get(generateApiQuery('series/' + str(series_id)))
+    parsed_json = json.loads(req.text)
+    return parsed_json
 
 
 # Function: getSeriesIdByName
@@ -244,6 +243,7 @@ def getSeriesIdByName(series_name):
             series_id = series['id']
 
     return int(series_id)
+    
 
 
 # Function: confirmSeries
@@ -258,51 +258,63 @@ def getSeriesIdByName(series_name):
 # @param media_type | STR | The media type from API.ai (Series, Movie etc.)
 # @param tvdbId | INT | The TV Series TVDB ID
 # @return result | DICT | Webhook Response
-def confirmSeries(series_name, media_type, tvdbId=0):
+# def confirmSeries(request):
+def confirmSeries(requested_series):
     context_list = []
     result = {}
+    print 'Test Print | confirmSeries.requested_series: '
+    print requested_series
 
-    # If only series_name parsed from request check for possible matches.
-    if tvdbId == 0:
-        # Query Sonarr for possible matches
-        possible_matches = lookupSeriesByName(series_name)
+    # If an id was passed from API.ai skip possible matches lookup and add by
+    # TVDB id to Sonarr.
+    if 'tvdb_id' in requested_series:
+        # Retrieve JSON result from TVDB by TVDB id
+        requested_series_match = lookupSeriesByTvdbId(int(requested_series['tvdb_id']))
+        result = addSeriesToWatchList(requested_series_match)
+    else:
+        # Query TVDB for any possible matches by the series_name
+        possible_matches = lookupSeriesByName(requested_series['media_title'])
 
-        # Set response text
-        response = 'There are ' + str(len(possible_matches)) + ' possible matches. Which one is correct? \n'
+        print 'Test Print | confirmSeries.possible_matches: '
+        print possible_matches
 
-        # Add each possible match to response text and create a context with title
-        # and the tvdbId (to avoid searching again)
-        for index, match in enumerate(possible_matches, start=1):
-            response += match['title'] + '. \n'
-            context_list.append({
+        # if possible_matches: # If possible_matches contains any matches
+
+        if len(possible_matches) == 0: # If no matches, return result
+            text_response = 'Whoops! Sonarr was unable to find a match for ' + requested_series['media_title'] + '. Please open Sonarr in your browser to add Series.'
+            print 'Text: ' + text_response
+            result = generateWebhookResponse(text_response, context_list)
+            print result
+
+        elif len(possible_matches) == 1: # If one match, skip to adding series by Name
+            # for match in possible_matches:
+            #     print 'match'
+            #     print match
+            #     result = addSeriesToWatchList(match)
+            result = addSeriesToWatchList(possible_matches)
+
+        else:
+            text_response = 'There are ' + str(len(possible_matches)) + ' possible matches. Which one is correct? \n'
+
+            # Add each possible match to response text and create a context with title
+            # and the tvdbId (to avoid searching again)
+            for index, match in enumerate(possible_matches, start=1):
+                text_response += match['title'] + '. \n'
+                context_list.append({
                     "name":"possible_match_0" + str(index),
                     "lifespan":2,
                     "parameters":{
                         'title': match['title'],
                         'tvdbId': match['tvdbId']
-                        }
+                    }
                 })
 
-        # Create custom app message formats
-        slack_message = {
-            'attachments': [{
-                'fallback': response,
-                'text': response,
-                'color': 'warning',
-                "thumb_url": config['sonarr']['resources']['app_logo'],
-            }]
-        }
+                # Generate the webhook response w/ custom messages and contexts
+                result = generateWebhookResponse(text_response, context_list)
 
-        # Generate the webhook response w/ custom messages and contexts
-        result = generateWebhookResponse(response, context_list, slack_message)
-
-    else:
-        exact_match = lookupSeriesByTvdbId(tvdbId)
-        print 'match: '
-        print exact_match
-        result = addSeriesToWatchList(exact_match)
-
+    # Returns Webhook result
     return result
+
 
 
 # Function: addSeriesToWatchList
@@ -315,8 +327,9 @@ def confirmSeries(series_name, media_type, tvdbId=0):
 # @param requested_tvdbId | INT | The TV Series TVDB ID
 # @param monitored | BOOL | Whether series is to monitored right away.
 # @return result | DICT | Webhook Response
-def addSeriesToWatchList(requested_series, requested_tvdbId=0, monitored=False):
+def addSeriesToWatchList(requested_series):
     response = ''
+    context_list = []
 
     # Check to see if match is already in Sonarr
     my_shows = getSeries()
@@ -324,12 +337,7 @@ def addSeriesToWatchList(requested_series, requested_tvdbId=0, monitored=False):
     for series in requested_series:
         for show in my_shows:
             if int(series['tvdbId']) == int(show['tvdbId']):
-                if config['comandarr']['settings']['slang'].lower() == 'au':
-                    print 'test1'
-                    response = 'You Dill! ' + series['title'] + ' is already in Sonarr'
-                else:
-                    print 'test2'
-                    response = 'Looks like Sonarr is already watching for ' + series['title']
+                response = 'Looks like Sonarr is already watching for ' + series['title']
             else:
                 data = { # Generate data query
                     'tvdbId': int(series['tvdbId']),
@@ -351,12 +359,11 @@ def addSeriesToWatchList(requested_series, requested_tvdbId=0, monitored=False):
                 parsed_json = json.loads(r.text)
 
                 # performCmdRescanSeries()
+                print 'Added: '
+                print parsed_json
 
                 #  Set user Response
-                if config['comandarr']['settings']['slang'].lower() == 'au':
-                    response = 'No Worries! ' + series['title'] + ' has been added to Sonarr.'
-                else:
-                    response = 'Success! ' + series['title'] + ' has been added to Sonarr.'
+                response = 'Success! ' + series['title'] + ' has been added to Sonarr.'
 
     # Create Rich Notifications
     slack_message = {
@@ -384,6 +391,8 @@ def addSeriesToWatchList(requested_series, requested_tvdbId=0, monitored=False):
             "thumb_url": config['sonarr']['resources']['app_logo'],
         }]
     }
-    context = {}
+    context_list = []
 
-    return generateWebhookResponse(response, context, slack_message)
+    result = generateWebhookResponse(response, context_list)
+    print result
+    return result
