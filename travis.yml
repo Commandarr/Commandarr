@@ -1,2 +1,3 @@
+language: python
 notifications:
   slack: comandarr:EMMkVipMozoO7i9OKMkx8yKI
