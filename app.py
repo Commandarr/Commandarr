@@ -51,7 +51,10 @@ def processRequest(request):
             data = radarr.addSeriesToWatchList(media_title, media_type)
     elif action == 'download_media_confirm':
         if media_type == 'Series':
-            data = sonarr.confirmSeries(media_title, media_type, request['result']['parameters']['tvdbId'])
+            for context in request['result']['contexts']:
+                if 'title' in context['parameters']:
+                    if context['parameters']['title'] == media_title:
+                        data = sonarr.confirmSeries(media_title, media_type, context['parameters']['tvdbId'])
 
 
     res = makeWebhookResult(data)
