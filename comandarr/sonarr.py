@@ -12,11 +12,13 @@
 #              through API.ai (Machine Learning(ML) and Natural Language
 #              Processing(NLP)) via webhook.
 #
+# Offical website: https://www.comandarr.github.io
 # Github Source: https://www.github.com/comandarr/comandarr/
 # Readme Source: https://www.github.com/comandarr/comandarr/README.md
 #
 # #############################################################################
 
+# Import Required modules
 import json
 import urllib2
 import requests
@@ -31,22 +33,48 @@ config = yaml.safe_load(open(CONFIG_PATH))
 # -------------------------------------------------------------
 # -------------------------- GENERIC --------------------------
 
-# Generate the server URL
+# Function: generateServerAddress
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Generate the server URL
+#
+# @return addr | STR | http(s)://ip_address:port
 def generateServerAddress():
     if config['sonarr']['server']['ssl']:
         http = 'https://'
     else:
         http = 'http://'
 
-    return http + config['sonarr']['server']['addr'] + ':' + str(config['sonarr']['server']['port'])
+    addr = http + config['sonarr']['server']['addr'] + ':' + str(config['sonarr']['server']['port'])
+    return addr
 
-# Performs a clean up of a URL to ensure it is valid.
+
+# Function: cleanUrl
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Performs a clean up of a URL to ensure it is valid.
+#
+# @param text | STR | Dirty URL Address
+# @return url | STR | Clean URL Address
 def cleanUrl(text):
     url = text.replace(' ', '%20') # replace spaces with %20
     return url
 
-# Generate the query for the Sonarr API
+
+# Function: generateApiQuery
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Generates an API Query that is compatible with Sonarr.
+#
+# @param endpoint | STR | The Sonarr API endpoint for query
+# @param parameters | DICT | Add any parameters to query
+# @return url | STR | HTTP api query string
 def generateApiQuery(endpoint, parameters={}):
+
+    # Set default API query with authentication
     url = generateServerAddress() + '/api/' + endpoint + '?apikey=' + config['sonarr']['auth']['apikey']
 
     # If parameters exist iterate through dict and add parameters to URL.
@@ -54,11 +82,24 @@ def generateApiQuery(endpoint, parameters={}):
         for key, value in parameters.iteritems():
             url += '&' + key + '=' + value
 
-    return url
+    return cleanUrl(url) # Clean URL (validate) and return as string
 
-# Generates the Webhook Response. This includes different integrations
+
+# Function: generateWebhookResponse
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Generates the Webhook Response.
+#
+# @param response | STR | Basic text response to user
+# @param context | DICT | Any extra contexts that need to be sent back to API.ai
+# @param slack_msg | DICT | Specific Slack formatting
+# @param tele_msg | DICT | Specific Telegram formatting
+# @param kik_msg | DICT | Specific Kik formatting
+# @param fb_msg | DICT | Specific Facebook Messenger formatting
+# @return result | DICT | The Response to user with different integration formatting.
 def generateWebhookResponse(response, context={}, slack_msg={}, fb_msg={}, tele_msg={}, kik_msg={}):
-    return {
+    result = {
         'speech': response,
         'displayText': response,
         'data': {
@@ -71,21 +112,25 @@ def generateWebhookResponse(response, context={}, slack_msg={}, fb_msg={}, tele_
         'source': 'Sonarr'
     }
 
-
-# ---------------------------------------------------------------
-# -------------------------- API/QUEUE --------------------------
-
-# Retrieve a list of episodes currently in queue to be downloaded.
-def getQueueList():
+    return result
 
 
 # ------------------------------------------------------------------
 # -------------------------- API/CALENDAR --------------------------
 
-# Retrieve a list of tv episodes due to be released (Up to 7 days)
-# def getUpcoming(days):
+# Function: getUpcoming
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Retrieve a list of tv episodes due to be released.
+#
+# TODO: Test and implement in API.ai
+#
+# @param days | STR | The amount of days requested for query
+# @return req | DICT | List of upcoming episodes within the amount of days requested
+def getUpcoming(days):
     todays_date = datetime.date.today()
-    weeks_end_date = todays_date + datetime.timedelta(days=days)
+    weeks_end_date = todays_date + datetime.timedelta(days=int(days))
 
     params = {
         'start': str(todays_date),
@@ -98,7 +143,15 @@ def getQueueList():
 # -----------------------------------------------------------------
 # -------------------------- API/COMMAND --------------------------
 
-# Rescan all Series in Sonarr
+# Function: performCmdRescanSeries
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Rescan all Series in Sonarr
+#
+# TODO: To test and implement in API.ai
+#
+# @return parsed_json | DICT | Result of Sonarr Command
 def performCmdRescanSeries():
     req = requests.get(generateApiQuery('command'))
     parsed_json = json.loads(req.text)
@@ -108,11 +161,17 @@ def performCmdRescanSeries():
 # ----------------------------------------------------------------------
 # -------------------------- API/QUEUE/LOOKUP --------------------------
 
-# Lookup Series information by the series name
+# Function: lookupSeriesByName
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Lookup Series information in TVDB by the series name
+#
+# @param series_name | STR | The name of the series to be looked up
+# @return parsed_json | DICT | List of all possible matches
 def lookupSeriesByName(series_name):
-    # Set query parameters
-    params = {
-        'term': cleanUrl(series_name)
+    params = { # Set query parameters
+        'term': series_name
     }
 
     # Perform Get request from Sonarr API
@@ -121,14 +180,18 @@ def lookupSeriesByName(series_name):
     return parsed_json
 
 
-# Lookup Series information by the series name
-def lookupSeriesByTvdbId(tvdb_id):
-    # Convert from Float to Integer to String
-    tvdb_id_str = str(int(tvdb_id))
 
-    # Set query parameters
-    params = {
-        'term': 'tvdb:' + tvdb_id_str
+# Function: lookupSeriesByTvdbId
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Lookup Series information in TVDB by the TVDB ID
+#
+# @param tvdb_id | FLOAT | The TVDB ID of the series to be looked up
+# @return parsed_json | DICT | List of all possible matches
+def lookupSeriesByTvdbId(tvdb_id):
+    params = { # Set query parameters
+        'term': 'tvdb:' + str(int(tvdb_id))
     }
 
     # Perform Get request from Sonarr API
@@ -140,17 +203,39 @@ def lookupSeriesByTvdbId(tvdb_id):
 # ----------------------------------------------------------------
 # -------------------------- API/SERIES --------------------------
 
-# Get all series listed in Sonarr
+# Function: getSeries
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Get all series information listed in Sonarr
+#
+# @return parsed_json | DICT | List of all tv series in Sonarr
 def getSeries():
     req = requests.get(generateApiQuery('series'))
     parsed_json = json.loads(req.text)
     return parsed_json
 
-# Get information about a singular series, found by show ID.
+
+# Function: getSeriesById
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Get information about a singular series, found by Sonarr's series ID.
+#
+# @param series_id | INT | Sonarr's Series ID
+# @return parsed_json | DICT | information about single TV Series in Sonarr
 def getSeriesById(series_id):
     return json.load(urllib2.urlopen(generateApiQuery('series/' + str(series_id))))
 
-# Get the Series ID by it's name
+
+# Function: getSeriesIdByName
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Get Sonarr's Series ID by the Series name
+#
+# @param series_name | STRING | The TV Show name
+# @return parsed_json | DICT | Returns the series id
 def getSeriesIdByName(series_name):
     series_id = ''
     all_series = getSeries()
@@ -160,7 +245,19 @@ def getSeriesIdByName(series_name):
 
     return int(series_id)
 
-# Confirm the Series with the user
+
+# Function: confirmSeries
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: If there is more than one possible match for the user's request,
+#              ask the user to confirm which series to download. Once confirmed
+#              send series_name & tvdb_id to function to be downloaded.
+#
+# @param series_name | STR | The TV Series name
+# @param media_type | STR | The media type from API.ai (Series, Movie etc.)
+# @param tvdbId | INT | The TV Series TVDB ID
+# @return result | DICT | Webhook Response
 def confirmSeries(series_name, media_type, tvdbId=0):
     context_list = []
     result = {}
@@ -208,10 +305,18 @@ def confirmSeries(series_name, media_type, tvdbId=0):
     return result
 
 
-# Add a TV Series to Sonarr
-def addSeriesToWatchList(requested_series, requested_tvdbId=0, monitored='false'):
+# Function: addSeriesToWatchList
+# Date Created: 29/03/2017
+# Author: Todd Johnson
+#
+# Description: Add the requested series to Sonarr
+#
+# @param requested_series | STR | The TV Series name
+# @param requested_tvdbId | INT | The TV Series TVDB ID
+# @param monitored | BOOL | Whether series is to monitored right away.
+# @return result | DICT | Webhook Response
+def addSeriesToWatchList(requested_series, requested_tvdbId=0, monitored=False):
     response = ''
-
 
     # Check to see if match is already in Sonarr
     my_shows = getSeries()
