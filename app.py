@@ -37,30 +37,50 @@ def webhook():
 
 
 def processRequest(request):
+    processed_data = [] # Store the processed data
+
+    # Set decision making variables from request
     media_title = request['result']['parameters']['media-title']
     media_type = request['result']['parameters']['media-type']
-    action = request['result']['action']
+    request_action = request['result']['action']
+    context_list = request['result']['contexts']
 
-    data = []
+    request_parameters = { # Set required parameters from request
+        'media_title': media_title,
+        'media_type': media_type,
+        'request_action': request_action,
+    }
 
-    # Based on Action. call the appropriate function.
-    if action == 'download_media':
+
+    if request_action == 'download_media' or request_action == 'download_media_confirm':
+
+        # If the title matches a possible match, append TVDB Id to request_parameters
+        for context in context_list:
+            if 'title' in context['parameters']:
+                if context['parameters']['title'] == media_title:
+                    request_parameters['tvdb_id'] = context['parameters']['tvdbId']
+
+        # Perform Confirmation based on media type
         if media_type == 'Series':
-            data = sonarr.confirmSeries(media_title, media_type)
+            processed_data = sonarr.confirmSeries(request_parameters)
         elif media_type == 'Movie':
-            data = radarr.addSeriesToWatchList(media_title, media_type)
-    elif action == 'download_media_confirm':
-        if media_type == 'Series':
-            for context in request['result']['contexts']:
-                if 'title' in context['parameters']:
-                    if context['parameters']['title'] == media_title:
-                        data = sonarr.confirmSeries(media_title, media_type, context['parameters']['tvdbId'])
+            processed_data = radarr.confirmMovie(request_parameters)
+
+    # if request_action == 'download_media'
+    #     if media_type == 'Series':
+    #         data = sonarr.confirmSeries(media_title, media_type)
+    #     elif media_type == 'Movie':
+    #         data = radarr.addSeriesToWatchList(media_title, media_type)
+    # elif request_action == 'download_media_confirm':
+    #     if media_type == 'Series':
+    #         for context in request['result']['contexts']:
+    #             if 'title' in context['parameters']:
+    #                 if context['parameters']['title'] == media_title:
+    #                     data = sonarr.confirmSeries(media_title, media_type, context['parameters']['tvdbId'])
 
 
-    res = makeWebhookResult(data)
+    return processed_data
 
-    print data
-    return res
 
 
 def sendAnalyticsReport(sent_data):
@@ -73,10 +93,6 @@ def sendAnalyticsReport(sent_data):
         req = requests.post('https://botanalytics.co/api/v1/messages/user/google-assistant/', data=processed_data, headers=headers)
         print 'Sent Analytics'
         print req.text
-
-
-def makeWebhookResult(result):
-    return result
 
 
 

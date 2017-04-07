@@ -1,0 +1,7 @@
+{
+  "name": "Comandarr Bot",
+  "description": "Comandarr is a Python & API.ai powered bot that interacts with Sonarr, Radarr & Lidarr",
+  "repository": "https://www.github.com/Comandarr/Comandarr",
+  "logo": "https://www.github.com/Comandarr/Comandarr/logo/logo.png",
+  "keywords": ["comandarr", "sonarr", "radarr", "lidarr", "python"]
+}
