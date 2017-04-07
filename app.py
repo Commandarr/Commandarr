@@ -16,20 +16,19 @@ from definitions import CONFIG_PATH
 config = yaml.safe_load(open(CONFIG_PATH))
 app = Flask(__name__)
 
-# VERSION: '0.1.0'
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
 
-    print('Request: ')
-    print(json.dumps(req, indent=4))
+    # print('Request: ')
+    # print(json.dumps(req, indent=4))
     sendAnalyticsReport(req)
 
     res = processRequest(req)
 
     res = json.dumps(res, indent=4)
-    print(res)
+    # print(res)
     r = make_response(res)
     r.headers['Content-Type'] = 'application/json'
     return r
@@ -65,18 +64,6 @@ def processRequest(request):
             processed_data = sonarr.confirmSeries(request_parameters)
         elif media_type == 'Movie':
             processed_data = radarr.confirmMovie(request_parameters)
-
-    # if request_action == 'download_media'
-    #     if media_type == 'Series':
-    #         data = sonarr.confirmSeries(media_title, media_type)
-    #     elif media_type == 'Movie':
-    #         data = radarr.addSeriesToWatchList(media_title, media_type)
-    # elif request_action == 'download_media_confirm':
-    #     if media_type == 'Series':
-    #         for context in request['result']['contexts']:
-    #             if 'title' in context['parameters']:
-    #                 if context['parameters']['title'] == media_title:
-    #                     data = sonarr.confirmSeries(media_title, media_type, context['parameters']['tvdbId'])
 
 
     return processed_data
