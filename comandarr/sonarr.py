@@ -22,94 +22,10 @@
 import json
 import urllib2
 import requests
-import yaml
 import datetime
 
-# Set User Configurations
-from definitions import CONFIG_PATH
-config = yaml.safe_load(open(CONFIG_PATH))
-
-
-# -------------------------------------------------------------
-# -------------------------- GENERIC --------------------------
-
-# Function: generateServerAddress
-# Date Created: 29/03/2017
-# Author: Todd Johnson
-#
-# Description: Generate the server URL
-#
-# @return addr | STR | http(s)://ip_address:port
-def generateServerAddress():
-    if config['sonarr']['server']['ssl']:
-        http = 'https://'
-    else:
-        http = 'http://'
-
-    return http + config['sonarr']['server']['addr'] + ':' + str(config['sonarr']['server']['port'])
-
-
-# Function: cleanUrl
-# Date Created: 29/03/2017
-# Author: Todd Johnson
-#
-# Description: Performs a clean up of a URL to ensure it is valid.
-#
-# @param text | STR | Dirty URL Address
-# @return url | STR | Clean URL Address
-def cleanUrl(text):
-    url = text.replace(' ', '%20') # replace spaces with %20
-    return url
-
-
-# Function: generateApiQuery
-# Date Created: 29/03/2017
-# Author: Todd Johnson
-#
-# Description: Generates an API Query that is compatible with Sonarr.
-#
-# @param endpoint | STR | The Sonarr API endpoint for query
-# @param parameters | DICT | Add any parameters to query
-# @return url | STR | HTTP api query string
-def generateApiQuery(endpoint, parameters={}):
-
-    # Set default API query with authentication
-    url = generateServerAddress() + '/api/' + endpoint + '?apikey=' + config['sonarr']['auth']['apikey']
-
-    # If parameters exist iterate through dict and add parameters to URL.
-    if parameters:
-        for key, value in parameters.iteritems():
-            url += '&' + key + '=' + value
-
-    return cleanUrl(url) # Clean URL (validate) and return as string
-
-
-# Function: generateWebhookResponse
-# Date Created: 29/03/2017
-# Author: Todd Johnson
-#
-# Description: Generates the Webhook Response.
-#
-# @param response | STR | Basic text response to user
-# @param context | DICT | Any extra contexts that need to be sent back to API.ai
-# @param slack_msg | DICT | Specific Slack formatting
-# @param tele_msg | DICT | Specific Telegram formatting
-# @param kik_msg | DICT | Specific Kik formatting
-# @param fb_msg | DICT | Specific Facebook Messenger formatting
-# @return result | DICT | The Response to user with different integration formatting.
-def generateWebhookResponse(response, context={}, slack_msg={}, fb_msg={}, tele_msg={}, kik_msg={}):
-    return {
-        'speech': response,
-        'displayText': response,
-        'data': {
-            'slack': slack_msg,
-            'facebook': fb_msg,
-            'telegram': tele_msg,
-            'kik': kik_msg
-        },
-        'contextOut': context,
-        'source': 'Sonarr'
-    }
+# Import custom modules
+import commons
 
 
 # ------------------------------------------------------------------
@@ -133,7 +49,7 @@ def getUpcoming(days):
         'start': str(todays_date),
         'end': str(weeks_end_date)
     }
-    req = requests.get(generateApiQuery('calendar', params))
+    req = requests.get(commons.generateApiQuery('calendar', params))
     return json.loads(req.text)
 
 
@@ -150,7 +66,7 @@ def getUpcoming(days):
 #
 # @return parsed_json | DICT | Result of Sonarr Command
 def performCmdRescanSeries():
-    req = requests.get(generateApiQuery('command'))
+    req = requests.get(commons.generateApiQuery('command'))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -172,10 +88,9 @@ def lookupSeriesByName(series_name):
     }
 
     # Perform Get request from Sonarr API
-    req = requests.get(generateApiQuery('series/lookup', params))
+    req = requests.get(commons.generateApiQuery('series/lookup', params))
     parsed_json = json.loads(req.text)
     return parsed_json
-
 
 
 # Function: lookupSeriesByTvdbId
@@ -192,7 +107,7 @@ def lookupSeriesByTvdbId(tvdb_id):
     }
 
     # Perform Get request from Sonarr API
-    req = requests.get(generateApiQuery('series/lookup', params))
+    req = requests.get(commons.generateApiQuery('series/lookup', params))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -208,7 +123,7 @@ def lookupSeriesByTvdbId(tvdb_id):
 #
 # @return parsed_json | DICT | List of all tv series in Sonarr
 def getSeries():
-    req = requests.get(generateApiQuery('series'))
+    req = requests.get(commons.generateApiQuery('series'))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -222,7 +137,7 @@ def getSeries():
 # @param series_id | INT | Sonarr's Series ID
 # @return parsed_json | DICT | information about single TV Series in Sonarr
 def getSeriesById(series_id):
-    req = requests.get(generateApiQuery('series/' + str(series_id)))
+    req = requests.get(commons.generateApiQuery('series/' + str(series_id)))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -243,7 +158,7 @@ def getSeriesIdByName(series_name):
             series_id = series['id']
 
     return int(series_id)
-    
+
 
 
 # Function: confirmSeries
@@ -262,8 +177,6 @@ def getSeriesIdByName(series_name):
 def confirmSeries(requested_series):
     context_list = []
     result = {}
-    print 'Test Print | confirmSeries.requested_series: '
-    print requested_series
 
     # If an id was passed from API.ai skip possible matches lookup and add by
     # TVDB id to Sonarr.
@@ -275,11 +188,6 @@ def confirmSeries(requested_series):
         # Query TVDB for any possible matches by the series_name
         possible_matches = lookupSeriesByName(requested_series['media_title'])
 
-        print 'Test Print | confirmSeries.possible_matches: '
-        print possible_matches
-
-        # if possible_matches: # If possible_matches contains any matches
-
         if len(possible_matches) == 0: # If no matches, return result
             text_response = 'Whoops! Sonarr was unable to find a match for ' + requested_series['media_title'] + '. Please open Sonarr in your browser to add Series.'
             print 'Text: ' + text_response
@@ -287,10 +195,6 @@ def confirmSeries(requested_series):
             print result
 
         elif len(possible_matches) == 1: # If one match, skip to adding series by Name
-            # for match in possible_matches:
-            #     print 'match'
-            #     print match
-            #     result = addSeriesToWatchList(match)
             result = addSeriesToWatchList(possible_matches)
 
         else:
@@ -335,6 +239,8 @@ def addSeriesToWatchList(requested_series):
     my_shows = getSeries()
 
     for series in requested_series:
+        print 'requested_series: '
+        print series
         for show in my_shows:
             if int(series['tvdbId']) == int(show['tvdbId']):
                 response = 'Looks like Sonarr is already watching for ' + series['title']
@@ -355,12 +261,8 @@ def addSeriesToWatchList(requested_series):
                 data_json = json.dumps(data)
 
                 # Submit request to API
-                r = requests.post(generateApiQuery('series'), data=data_json)
+                r = requests.post(commons.generateApiQuery('series'), data=data_json)
                 parsed_json = json.loads(r.text)
-
-                # performCmdRescanSeries()
-                print 'Added: '
-                print parsed_json
 
                 #  Set user Response
                 response = 'Success! ' + series['title'] + ' has been added to Sonarr.'
@@ -394,5 +296,4 @@ def addSeriesToWatchList(requested_series):
     context_list = []
 
     result = generateWebhookResponse(response, context_list)
-    print result
     return result
