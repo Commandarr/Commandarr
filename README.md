@@ -12,6 +12,8 @@ Comandarr is a bot that will interact with [Sonarr](https://github.com/Sonarr/So
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
+**Note:** The above Deploy Buttons are not finialised, please do not use!
+
 ## Integrations
 
 **Current Integrations**
