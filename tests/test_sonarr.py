@@ -12,6 +12,7 @@
 # #############################################################################
 
 import pytest
+import yaml
 from comandarr import sonarr
 
 

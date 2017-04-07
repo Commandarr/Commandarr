@@ -13,6 +13,7 @@
 
 # Import required modules
 import pytest
+import yaml
 from comandarr import commons
 
 
