@@ -3,3 +3,8 @@ config.yaml
 
 #Ignore all pyc files
 *.pyc
+
+# Ignore auto-generated dev folders
+.cache/
+.eggs/
+comandarr.egg-info/
