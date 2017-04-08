@@ -52,7 +52,7 @@ def getUpcoming(days):
         'start': str(todays_date),
         'end': str(weeks_end_date)
     }
-    req = requests.get(commons.generateApiQuery('calendar', params))
+    req = requests.get(commons.generateApiQuery('sonarr', 'calendar', params))
     return json.loads(req.text)
 
 
@@ -69,7 +69,7 @@ def getUpcoming(days):
 #
 # @return parsed_json | DICT | Result of Sonarr Command
 def performCmdRescanSeries():
-    req = requests.get(commons.generateApiQuery('command'))
+    req = requests.get(commons.generateApiQuery('sonarr', 'command'))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -91,7 +91,7 @@ def lookupSeriesByName(series_name):
     }
 
     # Perform Get request from Sonarr API
-    req = requests.get(commons.generateApiQuery('series/lookup', params))
+    req = requests.get(commons.generateApiQuery('sonarr', 'series/lookup', params))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -110,7 +110,7 @@ def lookupSeriesByTvdbId(tvdb_id):
     }
 
     # Perform Get request from Sonarr API
-    req = requests.get(commons.generateApiQuery('series/lookup', params))
+    req = requests.get(commons.generateApiQuery('sonarr', 'series/lookup', params))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -126,7 +126,7 @@ def lookupSeriesByTvdbId(tvdb_id):
 #
 # @return parsed_json | DICT | List of all tv series in Sonarr
 def getSeries():
-    req = requests.get(commons.generateApiQuery('series'))
+    req = requests.get(commons.generateApiQuery('sonarr', 'series'))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -140,7 +140,7 @@ def getSeries():
 # @param series_id | INT | Sonarr's Series ID
 # @return parsed_json | DICT | information about single TV Series in Sonarr
 def getSeriesById(series_id):
-    req = requests.get(commons.generateApiQuery('series/' + str(series_id)))
+    req = requests.get(commons.generateApiQuery('sonarr', 'series/' + str(series_id)))
     parsed_json = json.loads(req.text)
     return parsed_json
 
@@ -194,7 +194,11 @@ def confirmSeries(requested_series):
         if len(possible_matches) == 0: # If no matches, return result
             text_response = 'Whoops! Sonarr was unable to find a match for ' + requested_series['media_title'] + '. Please open Sonarr in your browser to add Series.'
             print 'Text: ' + text_response
+<<<<<<< HEAD
+            result = generateWebhookResponse('sonarr', text_response, context_list)
+=======
             result = commons.generateWebhookResponse(text_response, context_list)
+>>>>>>> origin/develop
             print result
 
         elif len(possible_matches) == 1: # If one match, skip to adding series by Name
@@ -217,7 +221,11 @@ def confirmSeries(requested_series):
                 })
 
                 # Generate the webhook response w/ custom messages and contexts
+<<<<<<< HEAD
+                result = generateWebhookResponse('sonarr', text_response, context_list)
+=======
                 result = commons.generateWebhookResponse(text_response, context_list)
+>>>>>>> origin/develop
 
     # Returns Webhook result
     return result
@@ -264,7 +272,7 @@ def addSeriesToWatchList(requested_series):
                 data_json = json.dumps(data)
 
                 # Submit request to API
-                r = requests.post(commons.generateApiQuery('series'), data=data_json)
+                r = requests.post(commons.generateApiQuery('sonarr', 'series'), data=data_json)
                 parsed_json = json.loads(r.text)
 
                 #  Set user Response
@@ -276,7 +284,11 @@ def addSeriesToWatchList(requested_series):
             'fallback': response,
             "pretext": "Message from Comandarr: " + response,
             'author_name': 'Sonarr',
+<<<<<<< HEAD
+            "author_link": generateServerAddress('sonarr') + '/series/' + series['titleSlug'],
+=======
             "author_link": commons.generateServerAddress() + '/series/' + series['titleSlug'],
+>>>>>>> origin/develop
             "author_icon": config['sonarr']['resources']['app_logo'],
             'title': 'Imported: ' + series['title'],
             # 'text': series['overview'],
@@ -298,5 +310,9 @@ def addSeriesToWatchList(requested_series):
     }
     context_list = []
 
+<<<<<<< HEAD
+    result = generateWebhookResponse('sonarr', response, context_list)
+=======
     result = commons.generateWebhookResponse(response, context_list)
+>>>>>>> origin/develop
     return result

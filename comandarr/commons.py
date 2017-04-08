@@ -31,14 +31,14 @@ config = yaml.safe_load(open(CONFIG_PATH))
 # Description: Generate the server URL
 #
 # @return addr | STR | http(s)://ip_address:port
-def generateServerAddress():
-    if config['sonarr']['server']['ssl']:
+def generateServerAddress(app):
+    if config[app]['server']['ssl']:
         http = 'https://'
     else:
         http = 'http://'
 
-    return http + config['sonarr']['server']['addr'] + ':' + \
-        str(config['sonarr']['server']['port'])
+    return http + config[app]['server']['addr'] + ':' + \
+        str(config[app]['server']['port'])
 
 
 # Function: cleanUrl
@@ -63,11 +63,11 @@ def cleanUrl(text):
 # @param endpoint | STR | The Sonarr API endpoint for query
 # @param parameters | DICT | Add any parameters to query
 # @return url | STR | HTTP api query string
-def generateApiQuery(endpoint, parameters={}):
+def generateApiQuery(app, endpoint, parameters={}):
 
     # Set default API query with authentication
-    url = generateServerAddress() + '/api/' + endpoint + '?apikey=' + \
-        config['sonarr']['auth']['apikey']
+    url = generateServerAddress(app) + '/api/' + endpoint + '?apikey=' + \
+        config[app]['auth']['apikey']
 
     # If parameters exist iterate through dict and add parameters to URL.
     if parameters:
@@ -90,7 +90,7 @@ def generateApiQuery(endpoint, parameters={}):
 # @param kik_msg | DICT | Specific Kik formatting
 # @param fb_msg | DICT | Specific Facebook Messenger formatting
 # @return result | DICT | The Response to user with different integration formatting.
-def generateWebhookResponse(response, context={}, slack_msg={}, fb_msg={}, \
+def generateWebhookResponse(app, response, context={}, slack_msg={}, fb_msg={}, \
     tele_msg={}, kik_msg={}):
     return {
         'speech': response,
@@ -102,5 +102,5 @@ def generateWebhookResponse(response, context={}, slack_msg={}, fb_msg={}, \
             'kik': kik_msg
         },
         'contextOut': context,
-        'source': 'Sonarr'
+        'source': app
     }
