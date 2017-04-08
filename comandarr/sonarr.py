@@ -31,6 +31,22 @@ import commons
 from definitions import CONFIG_PATH
 config = yaml.safe_load(open(CONFIG_PATH))
 
+
+# --------------------------------------------------------------------
+# -------------------------- API/ROOTFOLDER --------------------------
+# TODO: Using below functions when sending series to sonarr takes too
+#       long and causes a timeout error
+def getRootFolder():
+    req = requests.get(commons.generateApiQuery('sonarr', 'rootfolder'))
+    return json.loads(req.text)
+
+def getRootFolderPath():
+    data = getRootFolder()
+    path = ''
+    for obj in data:
+        path = obj['path']
+    return path
+
 # ------------------------------------------------------------------
 # -------------------------- API/CALENDAR --------------------------
 
@@ -194,11 +210,7 @@ def confirmSeries(requested_series):
         if len(possible_matches) == 0: # If no matches, return result
             text_response = 'Whoops! Sonarr was unable to find a match for ' + requested_series['media_title'] + '. Please open Sonarr in your browser to add Series.'
             print 'Text: ' + text_response
-<<<<<<< HEAD
-            result = generateWebhookResponse('sonarr', text_response, context_list)
-=======
-            result = commons.generateWebhookResponse(text_response, context_list)
->>>>>>> origin/develop
+            result = commons.generateWebhookResponse('sonarr', text_response, context_list)
             print result
 
         elif len(possible_matches) == 1: # If one match, skip to adding series by Name
@@ -221,11 +233,7 @@ def confirmSeries(requested_series):
                 })
 
                 # Generate the webhook response w/ custom messages and contexts
-<<<<<<< HEAD
-                result = generateWebhookResponse('sonarr', text_response, context_list)
-=======
-                result = commons.generateWebhookResponse(text_response, context_list)
->>>>>>> origin/develop
+                result = commons.generateWebhookResponse('sonarr', text_response, context_list)
 
     # Returns Webhook result
     return result
@@ -250,8 +258,6 @@ def addSeriesToWatchList(requested_series):
     my_shows = getSeries()
 
     for series in requested_series:
-        print 'requested_series: '
-        print series
         for show in my_shows:
             if int(series['tvdbId']) == int(show['tvdbId']):
                 response = 'Looks like Sonarr is already watching for ' + series['title']
@@ -265,7 +271,8 @@ def addSeriesToWatchList(requested_series):
                     'seasons': series['seasons'],
                     'monitored': True,
                     'seasonFolder': True,
-                    'path': '/Volumes/Plex Media 1/Plex/TV Shows/' + series['title']
+                    'path': config['sonarr']['server']['root_folder'] + series['title']
+                    # 'path': getRootFolderPath() + series['title']
                 }
 
                 # Convert to JSON
@@ -284,11 +291,7 @@ def addSeriesToWatchList(requested_series):
             'fallback': response,
             "pretext": "Message from Comandarr: " + response,
             'author_name': 'Sonarr',
-<<<<<<< HEAD
-            "author_link": generateServerAddress('sonarr') + '/series/' + series['titleSlug'],
-=======
-            "author_link": commons.generateServerAddress() + '/series/' + series['titleSlug'],
->>>>>>> origin/develop
+            "author_link": commons.generateServerAddress('sonarr') + '/series/' + series['titleSlug'],
             "author_icon": config['sonarr']['resources']['app_logo'],
             'title': 'Imported: ' + series['title'],
             # 'text': series['overview'],
@@ -310,9 +313,5 @@ def addSeriesToWatchList(requested_series):
     }
     context_list = []
 
-<<<<<<< HEAD
-    result = generateWebhookResponse('sonarr', response, context_list)
-=======
-    result = commons.generateWebhookResponse(response, context_list)
->>>>>>> origin/develop
+    result = commons.generateWebhookResponse('sonarr', response, context_list)
     return result
