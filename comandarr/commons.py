@@ -16,7 +16,7 @@ import json
 import yaml
 
 # Import User Configurations
-from definitions import CONFIG_PATH
+# from definitions import CONFIG_PATH
 config = yaml.safe_load(open(CONFIG_PATH))
 
 

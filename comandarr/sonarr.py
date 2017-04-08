@@ -28,6 +28,7 @@ import yaml
 # Import custom modules
 import commons
 
+config = yaml.safe_load(open(CONFIG_PATH))
 
 # ------------------------------------------------------------------
 # -------------------------- API/CALENDAR --------------------------
