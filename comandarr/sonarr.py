@@ -28,6 +28,7 @@ import yaml
 # Import custom modules
 import commons
 
+from definitions import CONFIG_PATH
 config = yaml.safe_load(open(CONFIG_PATH))
 
 # ------------------------------------------------------------------
@@ -193,7 +194,7 @@ def confirmSeries(requested_series):
         if len(possible_matches) == 0: # If no matches, return result
             text_response = 'Whoops! Sonarr was unable to find a match for ' + requested_series['media_title'] + '. Please open Sonarr in your browser to add Series.'
             print 'Text: ' + text_response
-            result = generateWebhookResponse(text_response, context_list)
+            result = commons.generateWebhookResponse(text_response, context_list)
             print result
 
         elif len(possible_matches) == 1: # If one match, skip to adding series by Name
@@ -216,7 +217,7 @@ def confirmSeries(requested_series):
                 })
 
                 # Generate the webhook response w/ custom messages and contexts
-                result = generateWebhookResponse(text_response, context_list)
+                result = commons.generateWebhookResponse(text_response, context_list)
 
     # Returns Webhook result
     return result
@@ -275,7 +276,7 @@ def addSeriesToWatchList(requested_series):
             'fallback': response,
             "pretext": "Message from Comandarr: " + response,
             'author_name': 'Sonarr',
-            "author_link": generateServerAddress() + '/series/' + series['titleSlug'],
+            "author_link": commons.generateServerAddress() + '/series/' + series['titleSlug'],
             "author_icon": config['sonarr']['resources']['app_logo'],
             'title': 'Imported: ' + series['title'],
             # 'text': series['overview'],
@@ -297,5 +298,5 @@ def addSeriesToWatchList(requested_series):
     }
     context_list = []
 
-    result = generateWebhookResponse(response, context_list)
+    result = commons.generateWebhookResponse(response, context_list)
     return result
