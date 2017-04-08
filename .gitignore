@@ -8,3 +8,7 @@ config.yaml
 .cache/
 .eggs/
 comandarr.egg-info/
+
+
+# Temporary will fixing CI issues.
+tests/
