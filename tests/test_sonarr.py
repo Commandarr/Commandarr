@@ -15,6 +15,8 @@ import pytest
 import yaml
 from comandarr import sonarr
 
+from definitions import CONFIG_PATH
+config = yaml.safe_load(open(CONFIG_PATH))
 
 
 def test_lookupSeriesByName():
