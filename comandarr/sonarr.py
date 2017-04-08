@@ -28,6 +28,8 @@ import yaml
 # Import custom modules
 import commons
 
+from definitions import CONFIG_PATH
+config = yaml.safe_load(open(CONFIG_PATH))
 
 # ------------------------------------------------------------------
 # -------------------------- API/CALENDAR --------------------------
@@ -192,7 +194,11 @@ def confirmSeries(requested_series):
         if len(possible_matches) == 0: # If no matches, return result
             text_response = 'Whoops! Sonarr was unable to find a match for ' + requested_series['media_title'] + '. Please open Sonarr in your browser to add Series.'
             print 'Text: ' + text_response
+<<<<<<< HEAD
             result = generateWebhookResponse('sonarr', text_response, context_list)
+=======
+            result = commons.generateWebhookResponse(text_response, context_list)
+>>>>>>> origin/develop
             print result
 
         elif len(possible_matches) == 1: # If one match, skip to adding series by Name
@@ -215,7 +221,11 @@ def confirmSeries(requested_series):
                 })
 
                 # Generate the webhook response w/ custom messages and contexts
+<<<<<<< HEAD
                 result = generateWebhookResponse('sonarr', text_response, context_list)
+=======
+                result = commons.generateWebhookResponse(text_response, context_list)
+>>>>>>> origin/develop
 
     # Returns Webhook result
     return result
@@ -274,7 +284,11 @@ def addSeriesToWatchList(requested_series):
             'fallback': response,
             "pretext": "Message from Comandarr: " + response,
             'author_name': 'Sonarr',
+<<<<<<< HEAD
             "author_link": generateServerAddress('sonarr') + '/series/' + series['titleSlug'],
+=======
+            "author_link": commons.generateServerAddress() + '/series/' + series['titleSlug'],
+>>>>>>> origin/develop
             "author_icon": config['sonarr']['resources']['app_logo'],
             'title': 'Imported: ' + series['title'],
             # 'text': series['overview'],
@@ -296,5 +310,9 @@ def addSeriesToWatchList(requested_series):
     }
     context_list = []
 
+<<<<<<< HEAD
     result = generateWebhookResponse('sonarr', response, context_list)
+=======
+    result = commons.generateWebhookResponse(response, context_list)
+>>>>>>> origin/develop
     return result
