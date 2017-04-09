@@ -57,7 +57,10 @@ def processRequest(request):
         for context in context_list:
             if 'title' in context['parameters']:
                 if context['parameters']['title'] == media_title:
-                    request_parameters['tvdb_id'] = context['parameters']['tvdbId']
+                    if 'tvdbId' in context['parameters']:
+                        request_parameters['tvdb_id'] = context['parameters']['tvdbId']
+                    elif 'tmdbId' in context['parameters']:
+                        request_parameters['tmdb_id'] = context['parameters']['tmdbId']
 
         # Perform Confirmation based on media type
         if media_type == 'Series':

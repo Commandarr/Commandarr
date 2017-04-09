@@ -265,7 +265,7 @@ def addSeriesToWatchList(requested_series):
                 data = { # Generate data query
                     'tvdbId': int(series['tvdbId']),
                     'title': series['title'],
-                    'qualityProfileId': 3,
+                    'qualityProfileId': config['sonarr']['server']['quality'],
                     'titleSlug': series['titleSlug'],
                     'images': series['images'],
                     'seasons': series['seasons'],
