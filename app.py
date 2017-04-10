@@ -84,7 +84,7 @@ def sendAnalyticsReport(sent_data):
 
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
+    port = int(os.getenv('PORT', 7676))
 
     print('Starting app on port %d' % port)
 
