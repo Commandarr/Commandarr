@@ -18,7 +18,7 @@ radarr:
     addr: myserver.ddns.net # Public IP Address or Dynamic DNS
     port: 7878 # Default: 7878
     ssl: False
-  authentication:
+  auth:
     apikey: apikey
   resources:
     app_logo: 'https://avatars3.githubusercontent.com/u/25025331?v=3&s=200'
@@ -29,7 +29,7 @@ radarr:
 lidarr:
   server:
     addr: myserver.ddns.net # Public IP Address or Dynamic DNS
-    port: 0000 # Default: 0000
+    port: 8686 # Default: 8686
     ssl: False
   auth:
     apikey: apikey
@@ -40,6 +40,10 @@ lidarr:
 
 # Comandarr Configuration
 comandarr:
+  server:
+    addr: myserver.ddns.net
+    port: 7676 # Default 7676
+    ssl: False
   settings:
     slang: au # AU (Australian) or US (American)
     explicit: False # slang must be AU
