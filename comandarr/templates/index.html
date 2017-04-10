@@ -1,0 +1,576 @@
+
+<!doctype html>
+<html>
+<head>
+    <title>Comandarr</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="/static/sonarr-theme.css" type="text/css">
+    <link rel="stylesheet" href="/static/sonarr-cells.css" type="text/css">
+    <link rel="stylesheet" href="/static/sonarr-settings.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/index.css" type="text/css">
+
+
+
+</head>
+<body>
+<div class="container">
+    <div id="nav-region">
+        <div id="nav-region"><div><!-- Static navbar -->
+            <div class="navbar navbar-nzbdrone" role="navigation">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle navbar-inverse" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-sonarr-navbar-collapsed fa-lg"></span>
+                        </button>
+                        <a class="navbar-brand" href="/">
+                            <!--<img src="/Content/Images/logo.png?v=2" alt="Sonarr">-->
+                            <img src="../static/img/logo-128.png" class="visible-lg">
+                            <img src="../static/img/logo-64.png" class="visible-md visible-sm">
+                            <span class="visible-xs">
+                                <img src="../static/img/logo-32.png">
+                                <span class="logo-text">Comandarr</span>
+                            </span>
+
+                        </a>
+                    </div>
+                    <div class="navbar-collapse collapse x-navbar-collapse">
+                        <ul class="nav navbar-nav">
+                            <li><a href="/activity" class="x-activity-nav"><i class="icon-sonarr-navbar-icon icon-sonarr-navbar-activity"></i> Activity<span id="x-queue-count" class="navbar-info"><span><span class="label label-warning">23</span></span></span></a></li>
+                            <li><a href="/settings" class="x-settings-nav"><i class="icon-sonarr-navbar-icon icon-sonarr-navbar-settings"></i> Settings</a></li>
+                            <li><a href="/system" class="x-system-nav"><i class="icon-sonarr-navbar-icon icon-sonarr-navbar-system"></i> System<span id="x-health" class="navbar-info"><span><span class="label label-danger">1</span></span></span></a></li>
+                            <li><a href="https://comandarr.io/donate" target="_blank"><i class="icon-sonarr-navbar-icon icon-sonarr-navbar-donate"></i> Donate</a></li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="active screen-size"></li>
+                        </ul>
+                    </div><!--/.nav-collapse -->
+                </div><!--/.container-fluid -->
+
+                <div class="col-md-12 search">
+                    <div class="col-md-6 col-md-offset-3">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <span class="twitter-typeahead" style="position: relative; display: inline-block; direction: ltr;"><input type="text" class="col-md-6 form-control x-series-search tt-hint" readonly autocomplete="off" spellcheck="false" style="position: absolute; top: 0px; left: 0px; border-color: transparent; box-shadow: none;"><input type="text" class="col-md-6 form-control x-series-search tt-input" placeholder="Search is currently disabled!" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent;"><pre aria-hidden="true" style="position: absolute; visibility: hidden; white-space: pre;" data-initialized="true"></pre><span class="tt-dropdown-menu" style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none; right: auto;"><div class="tt-dataset-series"></div></span></span>
+                        </div>
+                    </div>
+                </div>
+            </div></div></div>
+    </div>
+</div>
+<div id="page">
+    <div class="page-container">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12" id="notification-region"></div>
+            </div>
+            <div class="container-fluid main-region" id="main-region"><div><ul class="nav nav-tabs nav-justified settings-tabs">
+		<li class="active"><a href="#general" class="x-general-tab no-router">General</a></li>
+		<li><a href="#connect" class="x-connect-tab no-router">Connect</a></li>
+		<li><a href="#ui" class="x-ui-tab no-router">UI</a></li>
+</ul>
+
+<div class="row settings-controls">
+		<div class="col-sm-4 col-sm-offset-7 col-md-3 col-md-offset-8">
+				<div class="advanced-settings-toggle">
+						<span class="help-inline-checkbox hidden-xs">
+								Advanced Settings
+						</span>
+						<label class="checkbox toggle well">
+								<input type="checkbox" class="x-advanced-settings">
+								<p>
+										<span>Shown</span>
+										<span>Hidden</span>
+								</p>
+								<div class="btn btn-warning slide-button"></div>
+						</label>
+						<span class="help-inline-checkbox hidden-sm hidden-md hidden-lg">
+								Advanced Settings
+						</span>
+				</div>
+		</div>
+		<div class="col-sm-1 col-md-1">
+				<button class="btn btn-primary x-save-settings">Save</button>
+		</div>
+</div>
+
+
+<!-- General -->
+<div class="tab-content">
+	<div class="tab-pane active" id="media-management">
+        <div>
+            <div class="form-horizontal">
+                <div id="authentication">
+                    <div>
+                        <fieldset>
+                            <legend>Authentication</legend>
+
+                            <div class="x-auth-options">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Username</label>
+
+                                    <div class="col-sm-4">
+                                        <input type="text" placeholder="Username" name="username" spellcheck="false" class="form-control" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAAAXNSR0IArs4c6QAAAUBJREFUOBGVVE2ORUAQLvIS4gwzEysHkHgnkMiEc4zEJXCMNwtWTmDh3UGcYoaFhZUFCzFVnu4wIaiE+vvq6+6qTgthGH6O4/jA7x1OiCAIPwj7CoLgSXDxSjEVzAt9k01CBKdWfsFf/2WNuEwc2YqigKZpK9glAlVVwTTNbQJZlnlCkiTAZnF/mePB2biRdhwHdF2HJEmgaRrwPA+qqoI4jle5/8XkXzrCFoHg+/5ICdpm13UTho7Q9/0WnsfwiL/ouHwHrJgQR8WEwVG+oXpMPaDAkdzvd7AsC8qyhCiKJjiRnCKwbRsMw9hcQ5zv9maSBeu6hjRNYRgGFuKaCNwjkjzPoSiK1d1gDDecQobOBwswzabD/D3Np7AHOIrvNpHmPI+Kc2RZBm3bcp8wuwSIot7QQ0PznoR6wYSK0Xb/AGVLcWwc7Ng3AAAAAElFTkSuQmCC&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%;" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Password</label>
+
+                                    <div class="col-sm-4">
+                                        <input type="password" name="password" autocomplete="off" class="form-control" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAAAXNSR0IArs4c6QAAAUBJREFUOBGVVE2ORUAQLvIS4gwzEysHkHgnkMiEc4zEJXCMNwtWTmDh3UGcYoaFhZUFCzFVnu4wIaiE+vvq6+6qTgthGH6O4/jA7x1OiCAIPwj7CoLgSXDxSjEVzAt9k01CBKdWfsFf/2WNuEwc2YqigKZpK9glAlVVwTTNbQJZlnlCkiTAZnF/mePB2biRdhwHdF2HJEmgaRrwPA+qqoI4jle5/8XkXzrCFoHg+/5ICdpm13UTho7Q9/0WnsfwiL/ouHwHrJgQR8WEwVG+oXpMPaDAkdzvd7AsC8qyhCiKJjiRnCKwbRsMw9hcQ5zv9maSBeu6hjRNYRgGFuKaCNwjkjzPoSiK1d1gDDecQobOBwswzabD/D3Np7AHOIrvNpHmPI+Kc2RZBm3bcp8wuwSIot7QQ0PznoR6wYSK0Xb/AGVLcWwc7Ng3AAAAAElFTkSuQmCC&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%;">
+                                    </div>
+                                </div>
+
+                                <div class="form-group api-key">
+                                    <label class="col-sm-3 control-label">API Key</label>
+
+                                    <div class="col-sm-1 col-sm-push-4 help-inline">
+                                        <i class="icon-sonarr-form-warning" title="Requires restart to take effect"></i>
+                                    </div>
+
+                                    <div class="col-sm-4 col-sm-pull-1">
+                                        <div class="input-group">
+                                            <input type="text" name="apiKey" readonly="readonly" class="form-control x-api-key">
+                                            <div class="input-group-btn">
+                                                <button class="btn btn-icon-only x-copy-api-key hidden-xs"><i class="icon-sonarr-copy"></i></button>
+                                                <button class="btn btn-danger btn-icon-only x-reset-api-key" title="Reset API Key"><i class="icon-sonarr-refresh"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div id="privacy">
+                    <div>
+                        <fieldset>
+                            <legend>Start-Up</legend>
+
+                            <div class="form-group advanced-setting">
+                                <label class="col-sm-3 control-label">Bind Address</label>
+
+                                <div class="col-sm-1 col-sm-push-4 help-inline">
+                                    <i class="icon-sonarr-form-warning" title="Requires restart to take effect"></i>
+                                    <i class="icon-sonarr-form-info" title="Valid IP4 address or '*' for all interfaces"></i>
+                                </div>
+
+                                <div class="col-sm-4 col-sm-pull-1">
+                                    <input type="text" name="bindAddress" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Port Number</label>
+
+                                <div class="col-sm-1 col-sm-push-4 help-inline">
+                                    <i class="icon-sonarr-form-warning" title="Requires restart to take effect"></i>
+                                </div>
+
+                                <div class="col-sm-4 col-sm-pull-1">
+                                    <input type="number" placeholder="8989" name="port" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">URL Base</label>
+
+                                <div class="col-sm-1 col-sm-push-4 help-inline">
+                                    <i class="icon-sonarr-form-warning" title="Requires restart to take effect"></i>
+                                    <i class="icon-sonarr-form-info" title="For reverse proxy support, default is empty"></i>
+                                </div>
+
+                                <div class="col-sm-4 col-sm-pull-1">
+                                    <input type="text" name="urlBase" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group advanced-setting">
+                                <label class="col-sm-3 control-label">Enable SSL</label>
+
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <label class="checkbox toggle well">
+                                            <input type="checkbox" name="enableSsl" class="x-ssl">
+
+                                            <p>
+                                                <span>Yes</span>
+                                                <span>No</span>
+                                            </p>
+
+                                            <div class="btn btn-primary slide-button"></div>
+                                        </label>
+
+                                        <span class="help-inline-checkbox">
+                                            <i class="icon-sonarr-form-warning" title="Requires restart running as administrator to take effect"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="x-ssl-options" style="display: none;">
+                                <div class="form-group advanced-setting">
+                                    <label class="col-sm-3 control-label">SSL Port Number</label>
+
+                                    <div class="col-sm-4">
+                                        <input type="number" placeholder="8989" name="sslPort" class="form-control">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Open browser on start</label>
+
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <label class="checkbox toggle well">
+                                            <input type="checkbox" name="launchBrowser" class="form-control">
+
+                                            <p>
+                                                <span>Yes</span>
+                                                <span>No</span>
+                                            </p>
+
+                                            <div class="btn btn-primary slide-button"></div>
+                                        </label>
+
+                                        <span class="help-inline-checkbox">
+                                            <i class="icon-sonarr-form-info" title="Open a web browser and navigate to Radarr homepage on app start. Has no effect if installed as a windows service"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>Proxy Settings</legend>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Use Proxy</label>
+
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <label class="checkbox toggle well">
+                                            <input type="checkbox" name="proxyEnabled" class="form-control x-proxy">
+                                            <p>
+                                                <span>Yes</span>
+                                                <span>No</span>
+                                            </p>
+                                            <div class="btn btn-primary slide-button"></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="x-proxy-settings" style="display: none;">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Proxy Type</label>
+
+                                    <div class="col-sm-4">
+                                        <select name="proxyType" class="form-control">
+                                            <option value="http" selected="selected">HTTP(S)</option>
+                                            <option value="socks4">Socks4</option>
+                                            <option value="socks5">Socks5 (This option supports Tor)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Hostname</label>
+
+                                    <div class="col-sm-4">
+                                        <input type="text" placeholder="localhost" name="proxyHostname" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Port</label>
+
+                                    <div class="col-sm-4">
+                                        <input type="number" placeholder="8080" name="proxyPort" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Username</label>
+
+                                    <div class="col-sm-1 col-sm-push-4 help-inline">
+                                        <i class="icon-sonarr-form-info" title="You only need to enter a username and password if one is required. Leave them blank otherwise."></i>
+                                    </div>
+
+                                    <div class="col-sm-4 col-sm-pull-1">
+                                        <input type="text" name="proxyUsername" class="form-control" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAAAXNSR0IArs4c6QAAAUBJREFUOBGVVE2ORUAQLvIS4gwzEysHkHgnkMiEc4zEJXCMNwtWTmDh3UGcYoaFhZUFCzFVnu4wIaiE+vvq6+6qTgthGH6O4/jA7x1OiCAIPwj7CoLgSXDxSjEVzAt9k01CBKdWfsFf/2WNuEwc2YqigKZpK9glAlVVwTTNbQJZlnlCkiTAZnF/mePB2biRdhwHdF2HJEmgaRrwPA+qqoI4jle5/8XkXzrCFoHg+/5ICdpm13UTho7Q9/0WnsfwiL/ouHwHrJgQR8WEwVG+oXpMPaDAkdzvd7AsC8qyhCiKJjiRnCKwbRsMw9hcQ5zv9maSBeu6hjRNYRgGFuKaCNwjkjzPoSiK1d1gDDecQobOBwswzabD/D3Np7AHOIrvNpHmPI+Kc2RZBm3bcp8wuwSIot7QQ0PznoR6wYSK0Xb/AGVLcWwc7Ng3AAAAAElFTkSuQmCC&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%;" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Password</label>
+
+                                    <div class="col-sm-1 col-sm-push-4 help-inline">
+                                        <i class="icon-sonarr-form-info" title="You only need to enter a username and password if one is required. Leave them blank otherwise."></i>
+                                    </div>
+
+                                    <div class="col-sm-4 col-sm-pull-1">
+                                        <input type="password" name="proxyPassword" class="form-control" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAAAXNSR0IArs4c6QAAAUBJREFUOBGVVE2ORUAQLvIS4gwzEysHkHgnkMiEc4zEJXCMNwtWTmDh3UGcYoaFhZUFCzFVnu4wIaiE+vvq6+6qTgthGH6O4/jA7x1OiCAIPwj7CoLgSXDxSjEVzAt9k01CBKdWfsFf/2WNuEwc2YqigKZpK9glAlVVwTTNbQJZlnlCkiTAZnF/mePB2biRdhwHdF2HJEmgaRrwPA+qqoI4jle5/8XkXzrCFoHg+/5ICdpm13UTho7Q9/0WnsfwiL/ouHwHrJgQR8WEwVG+oXpMPaDAkdzvd7AsC8qyhCiKJjiRnCKwbRsMw9hcQ5zv9maSBeu6hjRNYRgGFuKaCNwjkjzPoSiK1d1gDDecQobOBwswzabD/D3Np7AHOIrvNpHmPI+Kc2RZBm3bcp8wuwSIot7QQ0PznoR6wYSK0Xb/AGVLcWwc7Ng3AAAAAElFTkSuQmCC&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%;" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Addresses for the proxy to ignore</label>
+
+                                    <div class="col-sm-1 col-sm-push-4 help-inline">
+                                        <i class="icon-sonarr-form-info" title="Use ',' as a separator, and '*.' as a wildcard for subdomains"></i>
+                                    </div>
+
+                                    <div class="col-sm-4 col-sm-pull-1">
+                                        <input type="text" name="proxyBypassFilter" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                <label class="col-sm-3 control-label">Bypass Proxy for Local Addresses</label>
+
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <label class="checkbox toggle well">
+                                            <input type="checkbox" name="proxyBypassLocalAddresses" class="form-control">
+
+                                            <p>
+                                                <span>Yes</span>
+                                                <span>No</span>
+                                            </p>
+
+                                            <div class="btn btn-primary slide-button"></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>Logging</legend>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Log Level</label>
+
+                                <div class="col-sm-1 col-sm-push-2 help-inline">
+                                    <i class="icon-sonarr-form-warning" title="Trace logging should only be enabled temporarily"></i>
+                                </div>
+
+                                <div class="col-sm-2 col-sm-pull-1">
+                                    <select name="logLevel" class="form-control">
+                                        <option value="Trace">Trace</option>
+                                        <option value="Debug">Debug</option>
+                                        <option value="Info">Info</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>Analytics</legend>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Enable</label>
+
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <label class="checkbox toggle well">
+                                            <input type="checkbox" name="analyticsEnabled" class="form-control">
+                                            <p>
+                                                <span>Yes</span>
+                                                <span>No</span>
+                                            </p>
+                                            <div class="btn btn-primary slide-button"></div>
+                                        </label>
+
+                                        <span class="help-inline-checkbox">
+                                            <i class="icon-sonarr-form-info" title="Send anonymous information about your browser and which parts of the web interface you use to Radarr servers. We use this information to prioritize features and browser support. We will NEVER include any personal information or any information that could identify you."></i>
+                                            <i class="icon-sonarr-form-warning" title="Requires restart to take effect"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- <fieldset class="advanced-setting"> -->
+                        <fieldset>
+                            <legend>Updates</legend>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Branch</label>
+
+                                <div class="col-sm-1 col-sm-push-2 help-inline">
+                                    <i class="icon-sonarr-form-warning" title="If using Docker, do not use 'develop' or 'nightly' branches"></i>
+                                </div>
+
+                                <div class="col-sm-2 col-sm-pull-1">
+                                    <input type="text" placeholder="master" name="branch" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning">Please see: <a href="https://github.com/Radarr/Radarr/wiki">the wiki</a> for more information</div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Automatic</label>
+
+                                <div class="col-sm-8">
+                                    <div class="input-group">
+                                        <label class="checkbox toggle well">
+                                            <input type="checkbox" name="updateAutomatically">
+                                            <p>
+                                                <span>On</span>
+                                                <span>Off</span>
+                                            </p>
+                                            <div class="btn btn-primary slide-button"></div>
+                                        </label>
+
+                                        <span class="help-inline-checkbox">
+                                            <i class="icon-sonarr-form-info" title="Automatically download and install updates. You will still be able to install from System: Updates"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Mechanism</label>
+
+                                <div class="col-sm-1 col-sm-push-4 help-inline">
+                                    <i class="icon-sonarr-form-info" title="Use built-in updater or external script"></i>
+                                </div>
+
+                                <div class="col-sm-4 col-sm-pull-1">
+                                    <select name="updateMechanism" class="form-control x-update-mechanism">
+                                        <option value="builtIn">Built-in</option>
+                                        <option value="script">Script</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group x-script-group" style="display: none;">
+                                <label class="col-sm-3 control-label">Script Path</label>
+
+                                <div class="col-sm-1 col-sm-push-4 help-inline">
+                                    <i class="icon-sonarr-form-info" title="Path to a custom script that take an extracted update package and handle the remainder of the update process"></i>
+                                </div>
+
+                                <div class="col-sm-4 col-sm-pull-1">
+                                    <input type="text" name="updateScriptPath" class="form-control">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+	<div class="tab-pane" id="connections">
+        <div>
+            <fieldset>
+                <legend>Connections</legend>
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="notification-list thingies">
+                            <li>
+                                <div class="notification-item thingy">
+                                    <div>
+                                        <h3>Sonarr</h3>
+                                    </div>
+
+                                    <div class="settings">
+                                        <span class="label label-default">On Grab</span>
+                                        <span class="label label-default">On Download</span>
+                                        <span class="label label-default">On Upgrade</span>
+                                        <span class="label label-default">On Rename</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="notification-item thingy">
+                                    <div>
+                                        <h3>Radarr</h3>
+                                    </div>
+
+                                    <div class="settings">
+                                        <span class="label label-success">On Grab</span>
+                                        <span class="label label-success">On Download</span>
+                                        <span class="label label-success">On Upgrade</span>
+                                        <span class="label label-default">On Rename</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="notification-item thingy add-card x-add-card">
+                                    <span class="center well">
+                                        <i class="icon-sonarr-add"></i>
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div> <!-- End Tab General -->
+
+
+<div id="loading-region" style="display: none;"><div class="nz-loading row"><div class="row">
+    <div class="col-md-12">
+        <div id="followingBalls">
+            <div id="ball-1" class="ball"></div>
+            <div id="ball-2" class="ball"></div>
+            <div id="ball-3" class="ball"></div>
+            <div id="ball-4" class="ball"></div>
+        </div>
+    </div>
+</div>
+</div></div>
+</div></div>
+            <div id="modal-region"></div>
+            <div id="modal-region2"></div>
+        </div>
+    </div>
+    <div id="scroll-up">
+        <i class="icon-sonarr-back-to-top visible-lg-inline" title="Back to the top!"></i>
+    </div>
+</div>
+<div class="footer">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="footer-region">
+                    Comandarr Ver.
+                    <span class="version"></span>
+                    <div class="branch"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="control-panel-region" class="control-panel"></div>
+<div id="errors"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("[class='x-advanced-settings']").bootstrapSwitch();
+    });
+</script>
+</body>
+
+</html>

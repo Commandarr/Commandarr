@@ -3,20 +3,41 @@ import requests
 import os
 import yaml
 
-from flask import Flask
-from flask import request
-from flask import make_response
+from flask import Flask, flash, redirect, render_template, request, session, abort, \
+make_response
 
-from comandarr import sonarr
-from comandarr import radarr
-from comandarr import lidarr
+# from comandarr import sonarr, radarr, lidarr
 
-from definitions import CONFIG_PATH
-
-config = yaml.safe_load(open(CONFIG_PATH))
+# from definitions import CONFIG_PATH
+#
+config = yaml.safe_load(open('config/config.yaml'))
 app = Flask(__name__)
 
+# Root of web interface
+@app.route('/')
+def home():
+    if not session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return render_template('index.html')
 
+
+@app.route('/login', methods=['POST'])
+def do_admin_login():
+    if request.form['password'] == config['comandarr']['auth']['password'] and \
+    request.form['username'] == config['comandarr']['auth']['username']:
+        session['logged_in'] = True
+    else:
+        flash('wrong password!')
+    return home()
+
+
+@app.route("/logout")
+def logout():
+    session['logged_in'] = False
+    return home()
+
+# Webhook for API.ai
 @app.route('/webhook', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
@@ -84,6 +105,7 @@ def sendAnalyticsReport(sent_data):
 
 
 if __name__ == '__main__':
+    app.secret_key = os.urandom(12)
     port = int(os.getenv('PORT', 7676))
 
     print('Starting app on port %d' % port)

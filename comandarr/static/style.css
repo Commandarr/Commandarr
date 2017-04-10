@@ -1,0 +1,26 @@
+html {
+  background: url('img/bg_logo.png') 50px 75px no-repeat;
+  background-color: #272727;
+  margin-bottom: 100px;
+}
+
+body {
+  font-family: "open sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #333;
+  background-color: #fff;
+}
+
+#page {
+  margin: 10px;
+  background-color: #ffffff;
+  padding: 10px;
+  color: #444444;
+  box-shadow: 0 0 10px 1px #aaaaaa;
+  border-radius: 3px;
+  background-clip: padding-box;
+  max-width: 1210px !important;
+  margin: auto;
+  padding: 20px 0;
+}
